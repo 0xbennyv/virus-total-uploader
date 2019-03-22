@@ -17,18 +17,24 @@ def parse_data(json_data):
     # scan_data = [json_data['sha256'], json_data['scan_date'], json_data['permalink'], json_data['positives'],
     #              json_data['scans']['Sophos']['detected'], json_data['scans']['Sophos']['result'],
     #              json_data['scans']['Sophos']['update'], json_data['scans']['Sophos']['version']]
-
-    keys = ['sha256', 'scan_date', 'permalink', 'positives']
-    scan_keys = ['detected', 'result', 'update', 'version']
     csv_data = {}
-    for key in keys:
-        csv_data.update({key: json_data[key]})
-    for scan_key in scan_keys:
-        if vendor == 'all':
-            csv_data.update({scan_key: json_data['scans']})
-        else:
+    if vendor == 'all':
+        keys = ['sha256', 'scan_date', 'permalink', 'positives']
+        scan_keys = ['detected', 'result', 'update', 'version']
+        for key in keys:
+            csv_data.update({key: json_data[key]})
+        for results in json_data['scans']:
+             csv_data.update({scan_keys: json_data['scans']})
+    else:
+        keys = ['sha256', 'scan_date', 'permalink', 'positives']
+        scan_keys = ['detected', 'result', 'update', 'version']
+        for key in keys:
+            csv_data.update({key: json_data[key]})
+        for scan_key in scan_keys:
             csv_data.update({'Vendor': vendor})
             csv_data.update({scan_key: json_data['scans'][vendor][scan_key]})
+
+
 
     with open(f'{vendor}_scan_result.csv', 'w') as f:
          w = csv.DictWriter(f, csv_data.keys())
